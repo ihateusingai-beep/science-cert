@@ -96,6 +96,21 @@
         .history-date { color: #6b7280; font-size: 0.85rem; }
         .history-score { font-weight: bold; color: #059669; }
         .history-stars { color: #f59e0b; }
+
+        /* Cert grade colors */
+        .cert-gold   { border-color: #f59e0b; background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%); }
+        .cert-silver { border-color: #9ca3af; background: linear-gradient(135deg, #f3f4f6 0%, #d1d5db 100%); }
+        .cert-bronze { border-color: #d97706; background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); }
+        .cert-gray   { border-color: #6b7280; background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%); }
+
+        /* Dashboard trend bar chart */
+        .trend-chart { display: flex; align-items: flex-end; gap: 6px; height: 60px; margin: 10px 0; }
+        .trend-bar-wrap { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .trend-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.5s ease; min-height: 4px; }
+        .trend-label { font-size: 0.7rem; color: #6b7280; margin-top: 4px; text-align: center; }
+
+        /* Concept mastery stars */
+        .concept-stars { font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -170,8 +185,9 @@
 
         <!-- 證書卡片 -->
         <div id="cert-card" class="hidden mt-5">
-            <div class="cert-container">
+            <div class="cert-container" id="cert-container-inner">
                 <div class="text-6xl mb-2">🎓</div>
+                <div id="cert-grade-badge" class="text-2xl font-bold mb-2" style="color:#92400e"></div>
                 <h3 class="text-2xl font-bold text-amber-700 mb-2">🌦️ 氣象小魔術師 🌦️</h3>
                 <p id="cert-name" class="text-xl font-bold text-gray-700 mb-2"></p>
                 <p class="text-lg text-gray-600 mb-4">恭喜完成學習評估！</p>
@@ -182,7 +198,7 @@
                     <div class="text-base text-gray-500">總正確率</div>
                 </div>
 
-                <!-- Concept breakdown -->
+                <!-- Concept breakdown with mastery stars -->
                 <div class="text-left bg-white/50 rounded-xl p-4 mb-4">
                     <p class="text-center text-xl font-bold text-sky-700 mb-3">📊 各概念學習進度</p>
 
@@ -191,25 +207,35 @@
                         <div class="concept-label text-sm font-bold text-amber-700">蒸發</div>
                         <div class="concept-bar-col"><div class="concept-bar-wrap"><div class="concept-bar bg-amber-400" id="bar-evap" style="width:0%"></div></div></div>
                         <div class="concept-pct text-amber-600" id="pct-evap">0%</div>
+                        <div class="concept-stars text-amber-500" id="stars-evap"></div>
                     </div>
                     <div class="concept-row">
                         <div class="concept-icon">☁️</div>
                         <div class="concept-label text-sm font-bold text-sky-700">凝結</div>
                         <div class="concept-bar-col"><div class="concept-bar-wrap"><div class="concept-bar bg-sky-400" id="bar-cond" style="width:0%"></div></div></div>
                         <div class="concept-pct text-sky-600" id="pct-cond">0%</div>
+                        <div class="concept-stars text-sky-500" id="stars-cond"></div>
                     </div>
                     <div class="concept-row">
                         <div class="concept-icon">🌧️</div>
                         <div class="concept-label text-sm font-bold text-blue-700">降水</div>
                         <div class="concept-bar-col"><div class="concept-bar-wrap"><div class="concept-bar bg-blue-400" id="bar-preci" style="width:0%"></div></div></div>
                         <div class="concept-pct text-blue-600" id="pct-preci">0%</div>
+                        <div class="concept-stars text-blue-500" id="stars-preci"></div>
                     </div>
                     <div class="concept-row">
                         <div class="concept-icon">🍹</div>
                         <div class="concept-label text-sm font-bold text-orange-700">露水</div>
                         <div class="concept-bar-col"><div class="concept-bar-wrap"><div class="concept-bar bg-orange-400" id="bar-dew" style="width:0%"></div></div></div>
                         <div class="concept-pct text-orange-600" id="pct-dew">0%</div>
+                        <div class="concept-stars text-orange-500" id="stars-dew"></div>
                     </div>
+                </div>
+
+                <!-- Learning trend chart (last 5 attempts) -->
+                <div id="trend-section" class="hidden text-left bg-white/60 rounded-xl p-4 mb-4">
+                    <p class="text-center text-lg font-bold text-sky-700 mb-2">📈 學習趨勢（最近5次）</p>
+                    <div id="trend-chart" class="trend-chart"></div>
                 </div>
 
                 <!-- Historical results -->
@@ -330,6 +356,99 @@
         try {
             return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
         } catch(e) { return []; }
+    }
+
+    // ── Personalized feedback based on student name, concept, difficulty ──
+    function getPersonalizedFeedback(name, concept, difficulty, isCorrect) {
+        var diffLabel = difficulty === 0 ? '🌱 易' : difficulty === 1 ? '🌿 中' : '🔥 難';
+        var studentSpecific = '';
+        var isZhouZhuofeng = (name.indexOf('卓鋒') !== -1 || name.indexOf('祝') !== -1);
+        var isZhangJunbao = (name.indexOf('鈞保') !== -1 || name.indexOf('張') !== -1);
+
+        // Student-specific style
+        if (isZhangJunbao) {
+            // 張鈞保：語音讚美，鼓勵性語氣，多用「好嘢」「好棒」
+            studentSpecific = isCorrect
+                ? '你真係好叻！🌟'
+                : '唔緊要！我哋再試過，一定得嘅！💪';
+        } else if (isZhouZhuofeng) {
+            // 祝卓鋒：門興趣，用開門比喻
+            studentSpecific = isCorrect
+                ? '好似開門一樣，你又答啱咗！🚪✨'
+                : '今次開唔到門，但係下次一定得！🚪💪';
+        } else {
+            studentSpecific = isCorrect
+                ? '你答啱咗！繼續加油！🌟'
+                : '唔緊要，再試多次！💪';
+        }
+
+        // Concept-specific explanations
+        var conceptExplain = '';
+        if (concept === 'evap') {
+            conceptExplain = isCorrect
+                ? '☀️ 記住啦！太陽熱辣辣，將 💧水 變做 💨水蒸氣 走上天空！'
+                : '記住：☀️太陽熱辣辣，水就會變做 💨水蒸氣 走上去——呢個係蒸發！';
+        } else if (concept === 'cond') {
+            conceptExplain = isCorrect
+                ? '☁️ 明白晒！暖空氣遇冷就變成小水滴，聚埋一齊就係雲！'
+                : '記住：💨暖空氣遇冷就凝結，變成一粒粒 💧小水滴——呢個係凝結！';
+        } else if (concept === 'preci') {
+            conceptExplain = isCorrect
+                ? '🌧️ 太棒了！雲入面既水滴太重，整唔住就跌落嚟——呢個係降水！'
+                : '記住：🌧️雨/雪都係因為雲入面既 💧水滴 太重跌落嚟——呢個係降水！';
+        } else if (concept === 'dew') {
+            conceptExplain = isCorrect
+                ? '🍹 非常好！暖濕空氣碰到凍嘅葉面，就會凝結變成露水！'
+                : '記住：🍹露水既關鍵——暖濕空氣 🌙 遇凍野表面 = 凝結！';
+        }
+
+        return studentSpecific + ' ' + conceptExplain + ' [' + diffLabel + ']';
+    }
+
+    // ── Cert grade based on overall % ──
+    function getCertGrade(pct) {
+        if (pct >= 90) return { grade: '🎓 氣象大師',   cls: 'cert-gold',   stars: 5, seal: '優異<br>認證', sealBg: 'linear-gradient(135deg, #f59e0b, #d97706)', emoji: '🏆' };
+        if (pct >= 70) return { grade: '🌟 氣象高手',   cls: 'cert-silver', stars: 4, seal: '通過<br>認證', sealBg: 'linear-gradient(135deg, #f59e0b, #d97706)', emoji: '🎉' };
+        if (pct >= 50) return { grade: '🌱 氣象學徒',   cls: 'cert-bronze', stars: 3, seal: '通過<br>認證', sealBg: 'linear-gradient(135deg, #f59e0b, #d97706)', emoji: '💪' };
+        return              { grade: '❄️ 加油學習',       cls: 'cert-gray',   stars: 2, seal: '繼續<br>努力', sealBg: 'linear-gradient(135deg, #94a3b8, #64748b)', emoji: '🌱' };
+    }
+
+    // ── Per-concept star rating ──
+    function conceptStars(pct) {
+        if (pct >= 100) return '★★★';
+        if (pct >= 66)  return '★★☆';
+        if (pct >= 33)  return '★☆☆';
+        return '☆☆☆';
+    }
+
+    // ── Render trend bar chart from history ──
+    function renderTrendChart() {
+        var hist = getHistory();
+        if (hist.length < 2) return; // need at least 2 data points for a trend
+        var recent = hist.slice(-5);
+        var maxPct = 100;
+        var chartEl = document.getElementById('trend-chart');
+        chartEl.innerHTML = '';
+        recent.forEach(function(r, i) {
+            var h = Math.max(4, Math.round((r.pct / maxPct) * 55));
+            var color = r.pct >= 90 ? '#f59e0b' : r.pct >= 60 ? '#6ee7b7' : '#f87171';
+            var wrap = document.createElement('div');
+            wrap.className = 'trend-bar-wrap';
+            var bar = document.createElement('div');
+            bar.className = 'trend-bar';
+            bar.style.height = '0px';
+            bar.style.background = color;
+            bar.setAttribute('aria-label', r.pct + '%');
+            var label = document.createElement('div');
+            label.className = 'trend-label';
+            label.textContent = r.pct + '%';
+            wrap.appendChild(bar);
+            wrap.appendChild(label);
+            chartEl.appendChild(wrap);
+            // Animate height
+            setTimeout(function() { bar.style.height = h + 'px'; }, 50 + i * 80);
+        });
+        document.getElementById('trend-section').classList.remove('hidden');
     }
 
     function showHistory() {
@@ -662,15 +781,17 @@
         // Disable all
         for (var i = 0; i < allBtns.length; i++) { allBtns[i].style.pointerEvents = 'none'; }
 
+        // Correct answer personalized feedback
         if (isCorrect) {
             if (btnEl) btnEl.classList.add('correct');
             liveScore += 10;
             conceptCorrect[qData.concept]++;
             document.getElementById('quiz-score-live').innerText = '⭕ ' + liveScore + ' 分';
+            var personalized = getPersonalizedFeedback(studentName, qData.concept, qData.difficulty, true);
             var fb = document.getElementById('quiz-feedback');
             fb.classList.remove('hidden');
             fb.className = 'mt-3 text-center text-xl font-bold text-green-600';
-            fb.innerText = '✅ 答啱啦！';
+            fb.innerHTML = '✅ ' + personalized;
             speak('答啱了！好嘢！');
             setTimeout(function() { advanceQuestion(); }, 1200);
         } else {
@@ -683,9 +804,10 @@
 
     function showWrongFeedback(qData) {
         var fb = document.getElementById('quiz-feedback');
+        var personalized = getPersonalizedFeedback(studentName, qData.concept, qData.difficulty, false);
         fb.classList.remove('hidden');
         fb.className = 'mt-3 text-center text-lg font-bold text-red-500';
-        fb.innerHTML = '❌ ' + qData.feedback;
+        fb.innerHTML = '❌ ' + personalized;
         speak(qData.feedback);
 
         var qIdx = currentQ;
@@ -743,6 +865,12 @@
         var totalCorrect = conceptCorrect.evap + conceptCorrect.cond + conceptCorrect.preci + conceptCorrect.dew;
         var overallPct = Math.round((totalCorrect / totalAttempts) * 100);
 
+        // Apply cert grade styling
+        var grade = getCertGrade(overallPct);
+        var certInner = document.getElementById('cert-container-inner');
+        certInner.className = 'cert-container ' + grade.cls;
+        document.getElementById('cert-grade-badge').innerText = grade.emoji + ' ' + grade.grade;
+
         document.getElementById('cert-overall').innerText = overallPct + '%';
 
         // Per-concept %
@@ -762,9 +890,14 @@
         document.getElementById('bar-preci').style.width = ppt.preci + '%';
         document.getElementById('bar-dew').style.width   = ppt.dew   + '%';
 
+        // Per-concept stars
+        document.getElementById('stars-evap').innerText   = conceptStars(ppt.evap);
+        document.getElementById('stars-cond').innerText   = conceptStars(ppt.cond);
+        document.getElementById('stars-preci').innerText = conceptStars(ppt.preci);
+        document.getElementById('stars-dew').innerText   = conceptStars(ppt.dew);
+
         // Stars: 1-3 stars based on overall %
-        var stars = overallPct >= 90 ? 3 : overallPct >= 60 ? 2 : 1;
-        var starStr = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+        var starStr = '★'.repeat(grade.stars) + '☆'.repeat(5 - grade.stars);
         document.getElementById('cert-stars').innerHTML = '<span class="feedback-star">' + starStr + '</span>';
 
         // Precision feedback per concept
@@ -781,24 +914,17 @@
         }
         document.getElementById('cert-feedback').innerHTML = feedbacks.join('<br>');
 
-        // Seal text: based on score
+        // Seal text: based on grade
         var sealEl = document.getElementById('cert-seal-text');
-        if (overallPct >= 90) {
-            sealEl.innerHTML = '優異<br>認證';
-            sealEl.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-        } else if (overallPct >= 60) {
-            sealEl.innerHTML = '通過<br>認證';
-            sealEl.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-        } else {
-            sealEl.innerHTML = '繼續<br>努力';
-            sealEl.style.background = 'linear-gradient(135deg, #94a3b8, #64748b)';
-        }
+        sealEl.innerHTML = grade.seal;
+        sealEl.style.background = grade.sealBg;
 
         // Save to localStorage
         saveResult(studentName, totalCorrect, totalAttempts, ppt);
 
-        // Show history
+        // Show history and trend
         showHistory();
+        renderTrendChart();
 
         createConfetti();
     }
