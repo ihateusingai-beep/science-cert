@@ -450,10 +450,10 @@
         </div>
     </div>
 
-<script>
-// ============ 全域變數 ============
-let studentName = "";
-let progress = { sun: false, cloud: false, rain: false, snow: false, dew: false };
+    <script>
+    // ============ 全域變數 ============
+    let studentName = "";
+    let progress = { sun: false, cloud: false, rain: false, snow: false, dew: false };
 let quizScore = 0;
 let currentLevel = 'easy';
 let currentQ = 0;
@@ -1310,7 +1310,6 @@ function downloadReport() {
     a.download = `氣象小魔術師_${studentName}_${new Date().toISOString().slice(0,10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-}
-</script>
+    </script>
 </body>
 </html>
