@@ -362,10 +362,12 @@
         if (!name) { alert("請輸入你的名字才能開始魔術喔！"); input.focus(); return; }
         studentName = name;
         document.getElementById('display-name').innerText = name;
-        landingPage.style.opacity = "0";
+        var lp = landingPage || document.getElementById('landing-page');
+        var gc = gameContainer || document.getElementById('game-container');
+        lp.style.opacity = "0";
         setTimeout(function() {
-            landingPage.style.display = "none";
-            gameContainer.classList.remove('hidden');
+            lp.style.display = "none";
+            gc.classList.remove('hidden');
         }, 500);
     }
 
