@@ -365,10 +365,11 @@
     function speak(text) {
         if (!speechEnabled) return;
         try {
+            window.speechSynthesis.cancel();
             var u = new SpeechSynthesisUtterance(text);
             u.lang = 'zh-TW';
-            u.rate = 0.9;
-            speechSynthesis.speak(u);
+            u.rate = 0.85;
+            window.speechSynthesis.speak(u);
         } catch(e) {}
     }
 
@@ -539,7 +540,7 @@
             quizOptsEl.appendChild(btn);
         });
 
-        // Voice mode: add hint button
+        // Voice mode: add hint button (ONLY in voice answer type)
         if (answerType === 'voice') {
             var hintBtn = document.createElement('button');
             hintBtn.className = 'voice-hint-btn mt-3 mx-auto block';
