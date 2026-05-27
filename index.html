@@ -62,6 +62,7 @@
         .picto-item:hover { transform: scale(1.05); border-color: #7dd3fc; }
         .picto-item.correct { background: #bbf7d0; border-color: #22c55e; }
         .picto-item.wrong { background: #fecaca; border-color: #ef4444; }
+        .picto-item.reveal-correct { background: #bbf7d0; border-color: #22c55e; animation: pulseGlow 0.8s ease-in-out 3; }
 
         /* ── Hint panel ── */
         .hint-panel { background: #fffbeb; border: 3px solid #f59e0b; border-radius: 1rem; padding: 12px 16px; margin-top: 10px; font-size: 1.1rem; color: #92400e; }
@@ -84,6 +85,17 @@
         /* Voice hint button */
         .voice-hint-btn { background: #fdf2f8; border: 3px solid #db2777; border-radius: 999px; padding: 8px 18px; font-size: 1.5rem; cursor: pointer; transition: transform 0.1s; }
         .voice-hint-btn:active { transform: scale(0.9); }
+
+        /* Retry button */
+        .retry-btn { background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%); border: 3px solid #d97706; border-radius: 999px; padding: 8px 20px; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; font-weight: bold; color: #92400e; }
+        .retry-btn:hover { transform: scale(1.05); }
+        .retry-btn:active { transform: scale(0.95); }
+
+        /* History section */
+        .history-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: white/40; border-radius: 8px; margin-bottom: 6px; font-size: 0.95rem; }
+        .history-date { color: #6b7280; font-size: 0.85rem; }
+        .history-score { font-weight: bold; color: #059669; }
+        .history-stars { color: #f59e0b; }
     </style>
 </head>
 <body>
@@ -94,9 +106,9 @@
             <h1 class="text-5xl font-bold text-sky-600 mb-4">🌦️ 氣象小魔術師</h1>
             <p class="text-xl text-gray-600 mb-6">水循環 ・ 分層學習系統</p>
             <div class="mb-5">
-                <input type="text" id="student-name" placeholder="請輸入你的名字" class="w-full text-2xl p-4 border-4 border-sky-300 rounded-xl text-center placeholder-gray-300">
+                <input type="text" id="student-name" placeholder="請輸入你的名字" class="w-full text-2xl p-4 border-4 border-sky-300 rounded-xl text-center placeholder-gray-300" aria-label="輸入名字">
             </div>
-            <button id="btn-start" class="w-full bg-sky-500 text-white text-3xl font-bold py-4 rounded-xl shadow-lg border-b-8 border-sky-700 active:border-b-0 active:translate-y-2 transition-all">開始冒險！🚀</button>
+            <button id="btn-start" class="w-full bg-sky-500 text-white text-3xl font-bold py-4 rounded-xl shadow-lg border-b-8 border-sky-700 active:border-b-0 active:translate-y-2 transition-all" aria-label="開始冒險按鈕">開始冒險！🚀</button>
         </div>
     </div>
 
@@ -104,7 +116,7 @@
     <div id="game-container" class="hidden max-w-md mx-auto bg-white rounded-3xl shadow-xl p-5 border-4 border-sky-200 min-h-screen flex flex-col">
         <div class="text-center mb-3">
             <span class="text-lg text-gray-500">歡迎，<span id="display-name" class="font-bold text-sky-600"></span>！</span>
-            <button id="speech-toggle" class="float-right text-2xl">🔇</button>
+            <button id="speech-toggle" class="float-right text-2xl" aria-label="切換語音">🔇</button>
         </div>
         <h2 class="text-2xl font-bold text-center text-sky-700 mb-3">🌦️ 水循環實驗室</h2>
         <div id="status-text" class="text-center text-xl text-gray-600 mb-3 min-h-[60px]">選擇下面既魔法按鈕，變出天氣！</div>
@@ -119,21 +131,21 @@
 
         <!-- 實驗按鈕區 -->
         <div class="grid grid-cols-3 gap-3 mt-4">
-            <button id="btn-sun" class="magic-btn btn-sun text-2xl p-3 rounded-xl border-4 font-bold">☀️ 太陽</button>
-            <button id="btn-cloud" class="magic-btn btn-cloud text-2xl p-3 rounded-xl border-4 font-bold">☁️ 雲</button>
-            <button id="btn-rain" class="magic-btn btn-rain text-2xl p-3 rounded-xl border-4 font-bold">🌧️ 雨</button>
-            <button id="btn-snow" class="magic-btn btn-snow text-2xl p-3 rounded-xl border-4 font-bold">❄️ 雪</button>
-            <button id="btn-dew" class="magic-btn btn-dew text-2xl p-3 rounded-xl border-4 font-bold">🍹 露水</button>
-            <button id="btn-quiz" class="magic-btn btn-quiz text-xl p-3 rounded-xl border-4 font-bold bg-purple-100 text-purple-400 border-purple-200">📝 評估</button>
+            <button id="btn-sun" class="magic-btn btn-sun text-2xl p-3 rounded-xl border-4 font-bold" role="button" aria-label="太陽按鈕">☀️ 太陽</button>
+            <button id="btn-cloud" class="magic-btn btn-cloud text-2xl p-3 rounded-xl border-4 font-bold" role="button" aria-label="雲按鈕">☁️ 雲</button>
+            <button id="btn-rain" class="magic-btn btn-rain text-2xl p-3 rounded-xl border-4 font-bold" role="button" aria-label="雨按鈕">🌧️ 雨</button>
+            <button id="btn-snow" class="magic-btn btn-snow text-2xl p-3 rounded-xl border-4 font-bold" role="button" aria-label="雪按鈕">❄️ 雪</button>
+            <button id="btn-dew" class="magic-btn btn-dew text-2xl p-3 rounded-xl border-4 font-bold" role="button" aria-label="露水按鈕">🍹 露水</button>
+            <button id="btn-quiz" class="magic-btn btn-quiz text-xl p-3 rounded-xl border-4 font-bold bg-purple-100 text-purple-400 border-purple-200" role="button" aria-label="評估按鈕">📝 評估</button>
         </div>
 
         <!-- 評估區 -->
         <div id="quiz-section" class="hidden mt-5">
             <!-- Answer type selector -->
             <div class="flex justify-center gap-3 mb-4">
-                <button class="answer-type-btn active" id="at-text" onclick="setAnswerType('text')">📝 字揀</button>
-                <button class="answer-type-btn" id="at-pic" onclick="setAnswerType('pic')" >🖼️ 圖揀</button>
-                <button class="answer-type-btn" id="at-voice" onclick="setAnswerType('voice')">🔊 聲音</button>
+                <button class="answer-type-btn active" id="at-text" role="button" aria-label="文字答題模式">📝 字揀</button>
+                <button class="answer-type-btn" id="at-pic" role="button" aria-label="圖片答題模式">🖼️ 圖揀</button>
+                <button class="answer-type-btn" id="at-voice" role="button" aria-label="語音答題模式">🔊 聲音</button>
             </div>
 
             <div class="quiz-card">
@@ -144,7 +156,7 @@
 
                 <!-- Difficulty badge -->
                 <div class="text-center mb-3">
-                    <span id="diff-badge" class="diff-badge diff-easy">🌱 易</span>
+                    <span id="diff-badge" class="diff-badge diff-easy" role="status" aria-live="polite">🌱 易</span>
                     <span id="diff-label" class="text-base text-gray-500 ml-2">圖像配對 · 直接觀察</span>
                 </div>
 
@@ -199,6 +211,12 @@
                     </div>
                 </div>
 
+                <!-- Historical results -->
+                <div id="history-section" class="hidden text-left bg-white/60 rounded-xl p-4 mb-4">
+                    <p class="text-center text-lg font-bold text-sky-700 mb-3">📜 歷史記錄</p>
+                    <div id="history-list"></div>
+                </div>
+
                 <!-- Precision feedback -->
                 <div id="cert-feedback" class="text-left bg-white/60 rounded-xl p-4 mb-4 text-gray-700 text-base"></div>
 
@@ -207,7 +225,7 @@
 
                 <div class="cert-seal" id="cert-seal-text">通過<br>認證</div>
                 <p class="text-sm text-gray-500 mt-4">日期：<span id="cert-date"></span></p>
-                <button onclick="location.reload()" class="mt-4 bg-sky-500 text-white px-6 py-3 rounded-xl font-bold">好棒！再玩一次 ✨</button>
+                <button id="btn-replay" class="mt-4 bg-sky-500 text-white px-6 py-3 rounded-xl font-bold" role="button" aria-label="再玩一次按鈕">好棒！再玩一次 ✨</button>
             </div>
         </div>
     </div>
@@ -237,16 +255,24 @@
         { q: "☁️ 雲係由啲咩组成既？", options: ["💨 風", "☀️ 太陽碎片", "💧 好細好細既水滴"], answer: 2, concept: 'cond', difficulty: 1, hint: "雲摸落去軟綿綿——其實係無數微小的水滴集合！", feedback: "雲既真身係無數 💧超細小既水滴 集合喺一起！" },
         { q: "🌡️ 高空為何比地面凍好多？", options: ["高空風大", "高空氣壓低 , 溫度下降", "高空無太陽"], answer: 1, concept: 'cond', difficulty: 2, hint: "氣壓低的地方溫度會話降就降——呢個係物理現象！", feedback: "氣壓低的地方溫度會急降，所以高空氣溫比地面凍好多！" },
 
-        // ── 降水 precip ──
+        // ── 降水 preci ──
         { q: "🌧️ 雨係點樣形成既？", options: ["☀️ 太陽曬", "☁️ 入面既水滴太重 , 整唔住跌落嚟", "💨 風吹落嚟"], answer: 1, concept: 'preci', difficulty: 0, hint: "雲入面有好多水滴，越積越多太重，最後整唔住就跌落嚟！", feedback: "雲裡面既 💧水滴 越積越重，最後整唔住就 🌧️跌落嚟 雨就形成！" },
-        { q: "❄️ 喺咩溫度先會落雪？", options: ["🔥 好熱時", "🥶 凍到大約0°C或以下", "☀️ 任何溫度都可以"], answer: 1, concept: 'preci', difficulty: 0, hint: "雪係冰嘅晶體——必須凍到一定溫度先整到！", feedback: "雪係 �冰雪既晶體，必須溫度低過 🥶0°C 先整得到！" },
+        { q: "❄️ 喺咩溫度先會落雪？", options: ["🔥 好熱時", "🥶 凍到大約0°C或以下", "☀️ 任何溫度都可以"], answer: 1, concept: 'preci', difficulty: 0, hint: "雪係冰嘅晶體——必須凍到一定溫度先整到！", feedback: "雪係冰雪既晶體，必須溫度低過 🥶0°C 先整得到！" },
         { q: "🌧️ 如果高空非常凍，雨滴會變成咩？", options: ["❄️ 雪", "💨 風", "☀️ 太陽"], answer: 0, concept: 'preci', difficulty: 1, hint: "雨係液態，但如果溫度再凍啲——液體變固體，就係雪！", feedback: "雨係液態 💧，溫度再凍就凝固變 ❄️雪 ——狀態改變！" },
 
         // ── 露水 dew ──
-        { q: "🍹 喺咩天氣情況下最容易見到露水？", options: ["🔥 炎熱潮濕既夜晚", "🌲 大風時", "❄️ 最凍既冬天"], answer: 0, concept: 'dew', difficulty: 0, hint: "露水需要暖濕空氣接觸凍野——炎熱潮濕既夜晚最岩！"", feedback: "炎熱潮濕既夜晚，暖空氣碰到地面/葉面等凍野，就凝結變 🍹露水！" },
+        { q: "🍹 喺咩天氣情況下最容易見到露水？", options: ["🔥 炎熱潮濕既夜晚", "🌲 大風時", "❄️ 最凍既冬天"], answer: 0, concept: 'dew', difficulty: 0, hint: "露水需要暖濕空氣接觸凍野——炎熱潮濕既夜晚最岩！", feedback: "炎熱潮濕既夜晚，暖空氣碰到地面/葉面等凍野，就凝結變 🍹露水！" },
         { q: "🍹 露水係點樣形成既？", options: ["🔥 高溫烤焗", "🌙 暖濕空氣遇冷 , 水氣凝結", "💨 強風吹出"], answer: 1, concept: 'dew', difficulty: 1, hint: "露水既關鍵字：暖空氣 + 凍野表面 = 凝結！", feedback: "記住公式：🌙暖濕空氣遇凍野 = 💧水氣凝結 = 🍹露水！" },
         { q: "🌿 點解早晨葉面會有露水但中午無？", options: ["葉面訓低咗", "夜晚地面散熱令葉面變凍 , 凝結水氣", "中午太忙無留意"], answer: 1, concept: 'dew', difficulty: 2, hint: "夜晚無太陽，地面同葉面散熱變凍，空氣既水分就黐埋一齊形成露水！", feedback: "夜晚地面散熱令葉面變凍，暖濕空氣黐上去就形成露水——呢個係凝結原理！" }
     ];
+
+    // ── Per-concept pictogram grids ──
+    var PICTO_GRIDS = {
+        evap:   { icons: ['☀️','💧','💨','🔼'], labels: ['太陽','水','水蒸氣','上升'] },
+        cond:   { icons: ['💨','☁️','❄️','💧'], labels: ['水蒸氣','雲','降溫','小水滴'] },
+        preci:  { icons: ['☁️','🌧️','❄️','💧'], labels: ['雲','雨','雪','水滴'] },
+        dew:    { icons: ['🌡️','🍃','💧','🌙'], labels: ['暖空氣','葉面','露水','夜晚'] }
+    };
 
     // Build 12-question quiz: 3 questions per concept × 4 concepts = 12
     // Each concept: 1 easy(d0)+1 medium(d1)+1 hard(d2)
@@ -273,7 +299,52 @@
     var conceptCorrect = { evap: 0, cond: 0, preci: 0, dew: 0 };
     var conceptAttempts = { evap: 0, cond: 0, preci: 0, dew: 0 };
 
+    // Retry tracking
+    var retryCount = {};  // keyed by question index
+
     var landingPage, gameContainer, statusText, cloud, sun, display;
+
+    // ── LocalStorage helpers ──
+    var LS_KEY = 'scienceCert_results';
+
+    function saveResult(name, score, total, ppt) {
+        try {
+            var results = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+            results.push({
+                name: name,
+                score: score,
+                total: total,
+                pct: Math.round((score / total) * 100),
+                stars: Math.round((score / total) * 100) >= 90 ? 3 : Math.round((score / total) * 100) >= 60 ? 2 : 1,
+                date: new Date().toLocaleString('zh-Hant'),
+                ppt: ppt
+            });
+            // Keep last 10
+            if (results.length > 10) results = results.slice(-10);
+            localStorage.setItem(LS_KEY, JSON.stringify(results));
+        } catch(e) {}
+    }
+
+    function getHistory() {
+        try {
+            return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+        } catch(e) { return []; }
+    }
+
+    function showHistory() {
+        var hist = getHistory();
+        if (hist.length === 0) return;
+        var el = document.getElementById('history-section');
+        var list = document.getElementById('history-list');
+        list.innerHTML = '';
+        hist.slice(-5).reverse().forEach(function(r) {
+            var row = document.createElement('div');
+            row.className = 'history-row';
+            row.innerHTML = '<span>' + r.name + '</span><span class="history-stars">' + '★'.repeat(r.stars) + '☆'.repeat(3 - r.stars) + '</span><span class="history-score">' + r.pct + '%</span><span class="history-date">' + r.date + '</span>';
+            list.appendChild(row);
+        });
+        el.classList.remove('hidden');
+    }
 
     function speak(text) {
         if (!speechEnabled) return;
@@ -386,6 +457,7 @@
     function startQuiz() {
         conceptCorrect = { evap: 0, cond: 0, preci: 0, dew: 0 };
         conceptAttempts = { evap: 0, cond: 0, preci: 0, dew: 0 };
+        retryCount = {};
         quizQuestions = buildQuiz(); // refresh shuffle
         currentQ = 0;
         liveScore = 0;
@@ -402,6 +474,16 @@
         if (d === 0) return { cls: 'diff-easy',   label: '🌱 易', sub: '圖像配對 · 直接觀察' };
         if (d === 1) return { cls: 'diff-medium', label: '🌿 中', sub: '文字理解 · 基本推理' };
         return              { cls: 'diff-hard',   label: '🔥 難', sub: '應用題 · 深度理解' };
+    }
+
+    // Shuffle helper: Fisher-Yates
+    function shuffleArr(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+        }
+        return a;
     }
 
     function renderQuestion(idx) {
@@ -422,35 +504,7 @@
         quizOptsEl.innerHTML = '';
 
         if (answerType === 'pic') {
-            // Show pictogram grid (2x2), 2 wrong + 1 correct shuffled
-            var pictoOptions = [
-                { icon: '💧', label: '水' }, { icon: '💨', label: '水蒸氣' }, { icon: '❄️', label: '冰' },
-                { icon: '☁️', label: '雲' }, { icon: '🌧️', label: '雨' }, { icon: '☀️', label: '太陽' },
-                { icon: '❄️', label: '雪' }, { icon: '🍹', label: '露水' }
-            ];
-            var correctLabel = q.options[q.answer];
-            var wrongLabels = q.options.filter(function(_, i){ return i !== q.answer; });
-            // Pick 2 wrong from the pool for 2x2 grid
-            var gridOptions = [correctLabel].concat(wrongLabels.slice(0, 2));
-            // But make sure we always have 4 items: use default concept icons for visual
-            var grid = [
-                { icon: '💧', label: '水' }, { icon: '💨', label: '水蒸氣' },
-                { icon: '☁️', label: '雲' }, { icon: '🌧️', label: '雨' }
-            ];
-            var gridEl = document.createElement('div');
-            gridEl.className = 'picto-grid';
-            grid.slice(0, 4).forEach(function(item, i) {
-                var btn = document.createElement('div');
-                btn.className = 'picto-item';
-                btn.innerHTML = '<span>' + item.icon + '</span>';
-                btn.dataset.idx = i;
-                btn.addEventListener('click', function() { checkQuizAnswer(i, q, btn, gridEl.querySelectorAll('.picto-item')); });
-                gridEl.appendChild(btn);
-            });
-            quizOptsEl.appendChild(gridEl);
-
-            // Change layout for picture mode
-            document.getElementById('quiz-question').innerHTML = q.q + '<div class="text-sm text-gray-400 mt-1">點擊圖片作答</div>';
+            renderPictoQuestion(q, quizOptsEl);
             return;
         }
 
@@ -460,10 +514,10 @@
             var baseCls = 'w-full text-left text-xl p-4 rounded-xl border-4 border-sky-200 bg-sky-50 hover:bg-sky-100 transition-all font-bold mb-2';
             btn.className = baseCls;
             btn.innerHTML = opt;
-            var label = opt; // store label for picto fallback
-            btn.addEventListener('click', (function(optIdx, label) {
+            btn.setAttribute('aria-label', opt.replace(/[^\w\s]/g, ''));
+            btn.addEventListener('click', (function(optIdx) {
                 return function() { checkQuizAnswer(optIdx, q, btn, null); };
-            })(idx, label));
+            })(idx));
             quizOptsEl.appendChild(btn);
         });
 
@@ -472,6 +526,7 @@
             var hintBtn = document.createElement('button');
             hintBtn.className = 'voice-hint-btn mt-3 mx-auto block';
             hintBtn.innerHTML = '🔊 聽提示';
+            hintBtn.setAttribute('aria-label', '播放語音提示');
             hintBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 speak(q.hint);
@@ -483,39 +538,65 @@
         }
     }
 
-    function checkQuizAnswer(selected, qData, btnEl, pictoItems) {
-        var correct = qData.answer;
-        var isCorrect = false;
+    function renderPictoQuestion(q, quizOptsEl) {
+        var concept = q.concept;
+        var gridDef = PICTO_GRIDS[concept] || PICTO_GRIDS.evap;
+        var correctLabel = q.options[q.answer];
 
-        if (pictoItems) {
-            // Pictogram: need to match label
-            var labels = ['水','水蒸氣','雲','雨'];
-            var selectedLabel = labels[selected];
-            var correctLabel = '水蒸氣'; // hardcoded for demo—in real scenario match by index
-            // Use actual correct answer mapping from options
-            /* For a general implementation we need to map grid index to question answer.
-               We'll use a simpler approach: compare selected number directly.
-               Since we can't reliably map, let's handle specially using data attributes. */
+        // Build 4 items from grid definition
+        var items = gridDef.icons.map(function(icon, i) {
+            return { icon: icon, label: gridDef.labels[i] };
+        });
+
+        // Shuffle items
+        var shuffled = shuffleArr(items);
+
+        // Find shuffled position of correct answer
+        var correctShuffledIdx = -1;
+        for (var i = 0; i < 4; i++) {
+            if (shuffled[i].label === correctLabel) {
+                correctShuffledIdx = i;
+                break;
+            }
         }
 
-        var quizOptsEl = document.getElementById('quiz-options');
-        var allBtns = pictoItems ? [].slice.call(pictoItems) : quizOptsEl.querySelectorAll('button:not(.voice-hint-btn)');
+        var gridEl = document.createElement('div');
+        gridEl.className = 'picto-grid';
 
-        // Determine correct by comparing with actual answer index
-        var answerLabels = qData.options;
-        var selectedLabel = pictoItems
-            ? ['水','水蒸氣','雲','雨'][selected]
-            : qData.options[selected];
-        isCorrect = (selectedLabel === answerLabels[qData.answer]);
+        shuffled.forEach(function(item, i) {
+            var btn = document.createElement('div');
+            btn.className = 'picto-item';
+            btn.innerHTML = '<span>' + item.icon + '</span>';
+            btn.setAttribute('role', 'button');
+            btn.setAttribute('aria-label', item.label + ' 選項');
+            btn.dataset.shuffledIdx = i;
+            btn.dataset.isCorrect = (i === correctShuffledIdx) ? '1' : '0';
+            btn.addEventListener('click', (function(shuffledIdx, isCorrect) {
+                return function() {
+                    checkPictoAnswer(shuffledIdx, isCorrect, q, gridEl.querySelectorAll('.picto-item'), correctShuffledIdx);
+                };
+            })(i, (i === correctShuffledIdx) ? '1' : '0'));
+            gridEl.appendChild(btn);
+        });
 
+        quizOptsEl.appendChild(gridEl);
+
+        // Change layout for picture mode
+        document.getElementById('quiz-question').innerHTML = q.q + '<div class="text-sm text-gray-400 mt-1">點擊圖片作答</div>';
+    }
+
+    function checkPictoAnswer(selectedIdx, isCorrectFlag, qData, pictoItems, correctShuffledIdx) {
         // Disable all
-        allBtns.forEach(function(b) { b.style.pointerEvents = 'none'; });
+        for (var i = 0; i < pictoItems.length; i++) {
+            pictoItems[i].style.pointerEvents = 'none';
+        }
 
         conceptAttempts[qData.concept]++;
 
-        if (isCorrect) {
-            if (btnEl) btnEl.classList.add('correct');
-            if (pictoItems) pictoItems[selected].classList.add('correct');
+        var wasCorrect = isCorrectFlag === '1';
+
+        if (wasCorrect) {
+            pictoItems[selectedIdx].classList.add('correct');
             liveScore += 10;
             conceptCorrect[qData.concept]++;
             document.getElementById('quiz-score-live').innerText = '⭕ ' + liveScore + ' 分';
@@ -524,27 +605,82 @@
             fb.className = 'mt-3 text-center text-xl font-bold text-green-600';
             fb.innerText = '✅ 答啱啦！';
             speak('答啱了！好嘢！');
-
-            setTimeout(function() {
-                advanceQuestion();
-            }, 1200);
+            setTimeout(function() { advanceQuestion(); }, 1200);
         } else {
-            if (btnEl) btnEl.classList.add('wrong');
-            if (pictoItems) pictoItems[selected].classList.add('wrong');
-            // Show correct
-            if (!pictoItems) {
-                allBtns[correct].classList.add('correct');
+            pictoItems[selectedIdx].classList.add('wrong');
+            // Highlight correct
+            if (correctShuffledIdx !== null && correctShuffledIdx >= 0) {
+                pictoItems[correctShuffledIdx].classList.add('reveal-correct');
             }
-            // Show hint/feedback
+            showWrongFeedback(qData);
+        }
+    }
+
+    function checkQuizAnswer(selected, qData, btnEl, pictoItems) {
+        var correct = qData.answer;
+
+        conceptAttempts[qData.concept]++;
+
+        var quizOptsEl = document.getElementById('quiz-options');
+        var allBtns = quizOptsEl.querySelectorAll('button:not(.voice-hint-btn):not(.retry-btn):not(.skip-btn)');
+
+        var isCorrect = (selected === correct);
+
+        // Disable all
+        for (var i = 0; i < allBtns.length; i++) { allBtns[i].style.pointerEvents = 'none'; }
+
+        if (isCorrect) {
+            if (btnEl) btnEl.classList.add('correct');
+            liveScore += 10;
+            conceptCorrect[qData.concept]++;
+            document.getElementById('quiz-score-live').innerText = '⭕ ' + liveScore + ' 分';
             var fb = document.getElementById('quiz-feedback');
             fb.classList.remove('hidden');
-            fb.className = 'mt-3 text-center text-lg font-bold text-red-500';
-            fb.innerHTML = '❌ ' + qData.feedback;
-            speak(qData.feedback);
+            fb.className = 'mt-3 text-center text-xl font-bold text-green-600';
+            fb.innerText = '✅ 答啱啦！';
+            speak('答啱了！好嘢！');
+            setTimeout(function() { advanceQuestion(); }, 1200);
+        } else {
+            if (btnEl) btnEl.classList.add('wrong');
+            // Show correct
+            if (allBtns[correct]) allBtns[correct].classList.add('correct');
+            showWrongFeedback(qData);
+        }
+    }
 
-            setTimeout(function() {
+    function showWrongFeedback(qData) {
+        var fb = document.getElementById('quiz-feedback');
+        fb.classList.remove('hidden');
+        fb.className = 'mt-3 text-center text-lg font-bold text-red-500';
+        fb.innerHTML = '❌ ' + qData.feedback;
+        speak(qData.feedback);
+
+        var qIdx = currentQ;
+        var retries = retryCount[qIdx] || 0;
+
+        if (retries < 2) {
+            // Show retry button
+            var retryBtn = document.createElement('button');
+            retryBtn.className = 'retry-btn mx-auto mt-3 block';
+            retryBtn.innerHTML = '🔄 再試一次';
+            retryBtn.setAttribute('aria-label', '再試一次');
+            retryBtn.addEventListener('click', function() {
+                retryCount[qIdx] = retries + 1;
+                fb.classList.add('hidden');
+                renderQuestion(qIdx);
+            });
+            fb.parentNode.appendChild(retryBtn);
+        } else {
+            // Show skip link after 2 retries used
+            var skipLink = document.createElement('button');
+            skipLink.className = 'skip-btn mx-auto mt-2 block text-sm text-gray-500 underline';
+            skipLink.innerHTML = '跳過呢題 ➜';
+            skipLink.setAttribute('aria-label', '跳過這題');
+            skipLink.addEventListener('click', function() {
+                fb.classList.add('hidden');
                 advanceQuestion();
-            }, 4000);
+            });
+            fb.parentNode.appendChild(skipLink);
         }
     }
 
@@ -619,6 +755,12 @@
             sealEl.style.background = 'linear-gradient(135deg, #94a3b8, #64748b)';
         }
 
+        // Save to localStorage
+        saveResult(studentName, totalCorrect, totalAttempts, ppt);
+
+        // Show history
+        showHistory();
+
         createConfetti();
     }
 
@@ -643,11 +785,17 @@
         document.getElementById('btn-snow').addEventListener('click', makeSnow);
         document.getElementById('btn-dew').addEventListener('click', makeDew);
         document.getElementById('btn-quiz').addEventListener('click', startQuiz);
+        document.getElementById('btn-replay').addEventListener('click', function() { location.reload(); });
 
         document.getElementById('speech-toggle').addEventListener('click', function() {
             speechEnabled = !speechEnabled;
             this.innerText = speechEnabled ? '🔇' : '🔊';
         });
+
+        // Answer type buttons - removed inline onclick, using addEventListener
+        document.getElementById('at-text').addEventListener('click', function() { setAnswerType('text'); });
+        document.getElementById('at-pic').addEventListener('click', function() { setAnswerType('pic'); });
+        document.getElementById('at-voice').addEventListener('click', function() { setAnswerType('voice'); });
 
         landingPage = document.getElementById('landing-page');
         gameContainer = document.getElementById('game-container');
