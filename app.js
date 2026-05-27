@@ -99,7 +99,6 @@ function showSound(text) {
 // ============ 小評估（5條題） ============
 function startQuiz() {
     document.getElementById('quiz-section').classList.remove('hidden');
-    document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' });
     quizScore = 0;
     currentQ = 0;
     loadQuizQuestion();
