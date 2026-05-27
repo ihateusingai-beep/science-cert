@@ -161,9 +161,10 @@
                 </div>
 
                 <div id="quiz-question" class="text-xl font-bold text-gray-700 mb-4 text-center"></div>
-                <div id="quiz-options" class="flex flex-col gap-2"></div>
-                <div id="quiz-hint-area" class="hidden"></div>
-                <div id="quiz-feedback" class="hidden mt-3 text-center text-lg font-bold"></div>
+                <div id="quiz-options" class="flex flex-col gap-2" role="listbox" aria-label="答題選項"></div>
+                <div id="quiz-hint-area" class="hidden" aria-live="polite"></div>
+                <div id="quiz-feedback" class="hidden mt-3 text-center text-lg font-bold" aria-live="assertive" role="status"></div>
+                <div id="quiz-retry-area" class="text-center"></div>
             </div>
         </div>
 
@@ -340,7 +341,22 @@
         hist.slice(-5).reverse().forEach(function(r) {
             var row = document.createElement('div');
             row.className = 'history-row';
-            row.innerHTML = '<span>' + r.name + '</span><span class="history-stars">' + '★'.repeat(r.stars) + '☆'.repeat(3 - r.stars) + '</span><span class="history-score">' + r.pct + '%</span><span class="history-date">' + r.date + '</span>';
+            // Use textContent for user data to prevent XSS
+            var nameSpan = document.createElement('span');
+            nameSpan.textContent = r.name;
+            var starsSpan = document.createElement('span');
+            starsSpan.className = 'history-stars';
+            starsSpan.textContent = '★'.repeat(r.stars) + '☆'.repeat(3 - r.stars);
+            var scoreSpan = document.createElement('span');
+            scoreSpan.className = 'history-score';
+            scoreSpan.textContent = r.pct + '%';
+            var dateSpan = document.createElement('span');
+            dateSpan.className = 'history-date';
+            dateSpan.textContent = r.date;
+            row.appendChild(nameSpan);
+            row.appendChild(starsSpan);
+            row.appendChild(scoreSpan);
+            row.appendChild(dateSpan);
             list.appendChild(row);
         });
         el.classList.remove('hidden');
@@ -350,7 +366,7 @@
         if (!speechEnabled) return;
         try {
             var u = new SpeechSynthesisUtterance(text);
-            u.lang = 'zh-HK';
+            u.lang = 'zh-TW';
             u.rate = 0.9;
             speechSynthesis.speak(u);
         } catch(e) {}
@@ -661,28 +677,34 @@
         var retries = retryCount[qIdx] || 0;
 
         if (retries < 2) {
-            // Show retry button
+            // Show retry button in dedicated retry area
+            var retryArea = document.getElementById('quiz-retry-area');
+            retryArea.innerHTML = '';
             var retryBtn = document.createElement('button');
-            retryBtn.className = 'retry-btn mx-auto mt-3 block';
+            retryBtn.className = 'retry-btn';
             retryBtn.innerHTML = '🔄 再試一次';
             retryBtn.setAttribute('aria-label', '再試一次');
             retryBtn.addEventListener('click', function() {
                 retryCount[qIdx] = retries + 1;
                 fb.classList.add('hidden');
+                retryArea.innerHTML = '';
                 renderQuestion(qIdx);
             });
-            fb.parentNode.appendChild(retryBtn);
+            retryArea.appendChild(retryBtn);
         } else {
-            // Show skip link after 2 retries used
+            // Show skip link after 2 retries used in retry area
+            var retryArea = document.getElementById('quiz-retry-area');
+            retryArea.innerHTML = '';
             var skipLink = document.createElement('button');
             skipLink.className = 'skip-btn mx-auto mt-2 block text-sm text-gray-500 underline';
             skipLink.innerHTML = '跳過呢題 ➜';
             skipLink.setAttribute('aria-label', '跳過這題');
             skipLink.addEventListener('click', function() {
                 fb.classList.add('hidden');
+                retryArea.innerHTML = '';
                 advanceQuestion();
             });
-            fb.parentNode.appendChild(skipLink);
+            retryArea.appendChild(skipLink);
         }
     }
 
