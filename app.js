@@ -156,6 +156,7 @@ function showCert() {
     document.getElementById('cert-card').classList.remove('hidden');
     document.getElementById('cert-name').innerText = studentName + '，恭喜你！';
     document.getElementById('cert-score').innerText = quizScore + '/50';
+    document.getElementById('cert-date').innerText = new Date().toLocaleDateString('zh-Hant');
     createConfetti();
 }
 
@@ -190,71 +191,10 @@ document.addEventListener('DOMContentLoaded', function() {
     quizOptsEl = document.getElementById('quiz-options');
     quizProgEl = document.getElementById('quiz-progress');
     document.getElementById('btn-start').addEventListener('click', enterGame);
+    document.getElementById('btn-sun').addEventListener('click', makeSun);
+    document.getElementById('btn-cloud').addEventListener('click', makeCloud);
+    document.getElementById('btn-rain').addEventListener('click', makeRain);
+    document.getElementById('btn-snow').addEventListener('click', makeSnow);
+    document.getElementById('btn-dew').addEventListener('click', makeDew);
+    document.getElementById('btn-quiz').addEventListener('click', startQuiz);
 });
-// ============ 小評估（5條題） ============
-var quizOptsEl;
-
-function loadQuizQuestion() {
-    var questions = [
-        { q: "☀️ 太陽令水變成咩？", o: ["💨 氣體", "🌧️ 雨", "☁️ 雲"], a: 0 },
-        { q: "❄️ 空氣變冷時，水氣會點樣？", o: ["🔽 掉落下來", "🤝 抱在一起變雲", "💨 飛走"], a: 1 },
-        { q: "🌧️ 雨係點樣形成嘅？", o: ["💨 太陽曬", "❄️ 雲裡面凍到出水", "🔥 火燒"], a: 1 },
-        { q: "❄️ 雪係喺咩溫度形成？", o: ["🔥 好熱", "☀️ 有時凍", "🥶 極凍 (~0°C)"], a: 2 },
-        { q: "🍹 露水係點樣出現？", o: ["🔥 高溫", "💨 壓縮", "🌙 暖空氣遇冷野"], a: 2 }
-    ];
-    var q = questions[currentQ];
-    document.getElementById('quiz-question').innerText = q.q;
-    quizOptsEl = document.getElementById('quiz-options');
-    quizOptsEl.innerHTML = '';
-    q.o.forEach(function(opt, idx) {
-        var btn = document.createElement('button');
-        btn.className = 'w-full text-left text-xl p-4 rounded-xl border-4 border-sky-200 bg-sky-50 hover:bg-sky-100 transition-all font-bold mb-3';
-        btn.innerText = opt;
-        btn.onclick = (function(s, c, b) { return function() { checkQuizAnswer(s, c, b); }; })(idx, q.a, btn);
-        quizOptsEl.appendChild(btn);
-    });
-    document.getElementById('quiz-progress').innerText = '第 ' + (currentQ + 1) + ' 題 / ' + questions.length + ' 題';
-}
-
-function checkQuizAnswer(selected, correct, btnEl) {
-    var buttons = quizOptsEl.querySelectorAll('button');
-    for (var i = 0; i < buttons.length; i++) buttons[i].style.pointerEvents = 'none';
-    if (selected === correct) {
-        btnEl.classList.add('bg-green-200', 'border-green-400');
-        quizScore += 10;
-    } else {
-        btnEl.classList.add('bg-red-200', 'border-red-400');
-        buttons[correct].classList.add('bg-green-200', 'border-green-400');
-    }
-    setTimeout(function() {
-        currentQ++;
-        if (currentQ >= 5) { showCert(); return; }
-        loadQuizQuestion();
-    }, 1200);
-}
-
-function startQuiz() {
-    document.getElementById('quiz-section').classList.remove('hidden');
-    document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' });
-    quizScore = 0;
-    currentQ = 0;
-    loadQuizQuestion();
-}
-
-function showCert() {
-    document.getElementById('quiz-section').classList.add('hidden');
-    document.getElementById('cert-card').classList.remove('hidden');
-    document.getElementById('cert-name').innerText = studentName + '，恭喜你！';
-    document.getElementById('cert-score').innerText = quizScore + '/50';
-    createConfetti();
-}
-
-function createConfetti() {
-    var colors = ['#facc15','#fb923c','#34d399','#60a5fa','#a78bfa','#f472b6'];
-    for (var i = 0; i < 50; i++) {
-        var c = document.createElement('div');
-        c.style.cssText = 'position:fixed;top:-20px;left:' + Math.random()*100 + 'vw;width:10px;height:10px;background:' + colors[Math.floor(Math.random()*6)] + ';border-radius:2px;z-index:9999;pointer-events:none;animation:confetti-fall ' + (1+Math.random()*2) + 's linear forwards';
-        document.body.appendChild(c);
-        setTimeout(function(el){ el.remove(); }, 4000, c);
-    }
-}
