@@ -554,6 +554,7 @@ const quizProgEl = document.getElementById('quiz-progress');
 
 // ============ 登入邏輯 ============
 function enterGame() {
+    console.log('enterGame called');
     const input = document.getElementById('student-name');
     const name = input.value.trim();
     if (!name) {
@@ -571,6 +572,16 @@ function enterGame() {
         gameContainer.classList.remove('hidden');
     }, 500);
 }
+
+// Enter key support
+document.addEventListener('DOMContentLoaded', () => {
+    const nameInput = document.getElementById('student-name');
+    if (nameInput) {
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') enterGame();
+        });
+    }
+});
 
 function resetGame() {
     location.reload();
