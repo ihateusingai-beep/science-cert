@@ -189,6 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
     quizQEl = document.getElementById('quiz-question');
     quizOptsEl = document.getElementById('quiz-options');
     quizProgEl = document.getElementById('quiz-progress');
+    document.getElementById('btn-start').addEventListener('click', enterGame);
 });
 // ============ 小評估（5條題） ============
 var quizOptsEl;
