@@ -5,452 +5,134 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>氣象小魔術師 - 分級證書版</title>
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
-    <style>body { opacity: 0; }</style>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>window._queue = window._queue || [];</script>
     <style>
-        body { opacity: 1 !important; font-family: 'ZCOOL+KuaiLe', cursive, system-ui, sans-serif; background-color: #f0f9ff; overflow-x: hidden; touch-action: manipulation; user-select: none; }
-        #landing-page {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-            z-index: 9999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-        }
-        .login-card {
-            background: white; padding: 3rem; border-radius: 2rem;
-            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
-            text-align: center; border: 8px solid #7dd3fc;
-            width: 90%; max-width: 450px; animation: bounceIn 1s;
-        }
-        @keyframes bounceIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            50% { transform: scale(1.05); }
-            70% { transform: scale(0.9); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .canvas-area {
-            height: 380px; position: relative;
-            background: linear-gradient(to bottom, #87CEEB, #E0F2FE);
-            border-radius: 2rem; overflow: hidden; border: 8px solid #bae6fd;
-            transition: all 1s ease; cursor: pointer;
-        }
-        .magic-btn {
-            transition: transform 0.1s, filter 0.2s;
-            box-shadow: 0 6px 0 #94a3b8; position: relative;
-        }
-        .magic-btn:active { transform: translateY(6px); box-shadow: none; }
-        .disabled-btn {
-            filter: grayscale(100%) opacity(40%); pointer-events: none;
-            box-shadow: none; transform: translateY(2px);
-        }
-        .sun {
-            position: absolute; top: -60px; right: -60px; font-size: 80px;
-            transition: all 1s ease; filter: drop-shadow(0 0 20px rgba(253, 224, 71, 0.8));
-            opacity: 0; z-index: 5;
-        }
-        .sun-active { top: 20px; right: 20px; opacity: 1; animation: spinSun 20s linear infinite; }
-        @keyframes spinSun { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .puddle {
-            position: absolute; bottom: 20px; left: 50%;
-            transform: translateX(-50%) scaleX(1); width: 120px; height: 30px;
-            background-color: #3b82f6; border-radius: 50%; opacity: 0.8;
-            transition: all 2s ease; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); z-index: 5;
-        }
-        .vapor-dot {
-            position: absolute; width: 10px; height: 10px; background-color: white;
-            border-radius: 50%; opacity: 0.6; filter: blur(1px); pointer-events: none;
-        }
-        .vapor-floating { animation: floatVapor 4s infinite ease-in-out; }
-        @keyframes floatVapor {
-            0%, 100% { transform: translateY(0) translateX(0); }
-            50% { transform: translateY(-10px) translateX(5px); }
-        }
-        .cloud {
-            position: absolute; width: 160px; transition: all 1.5s ease;
-            opacity: 0; z-index: 10; transform: scale(0.5);
-        }
-        .rain-drop {
-            position: absolute; width: 8px; height: 18px;
-            background-color: #3b82f6; border-radius: 50%;
-            animation: fall 0.8s linear infinite;
-        }
-        .snow-flake {
-            position: absolute; color: white; font-size: 32px;
-            animation: fall 3s linear infinite; text-shadow: 0 0 5px rgba(0,0,0,0.2);
-        }
-        @keyframes fall { to { transform: translateY(500px); } }
-        .sound-word {
-            position: absolute; font-size: 2rem; font-weight: bold; color: white;
-            opacity: 0; pointer-events: none; animation: floatText 2s ease-out forwards;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.2); z-index: 50;
-        }
-        @keyframes floatText {
-            0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            20% { opacity: 1; transform: scale(1.2); }
-            100% { transform: translateY(-50px) scale(1); opacity: 0; }
-        }
-        .toast-popup {
-            display: none; position: fixed; top: 20%; left: 50%;
-            transform: translateX(-50%); z-index: 100;
-            background: rgba(255, 255, 255, 0.95); padding: 1rem 2rem;
-            border-radius: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            text-align: center; border: 4px solid #38bdf8;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes popIn {
-            0% { transform: translateX(-50%) scale(0.5); opacity: 0; }
-            100% { transform: translateX(-50%) scale(1); opacity: 1; }
-        }
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 200;
-            justify-content: center; align-items: center; backdrop-filter: blur(5px);
-        }
-        .quiz-card {
-            background: white; width: 90%; max-width: 500px; border-radius: 2rem;
-            padding: 2rem; border: 8px solid #fbbf24; text-align: center;
-            position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
-        .quiz-option {
-            background: #f0f9ff; border: 3px solid #bae6fd; border-radius: 1rem;
-            padding: 1rem; margin: 0.75rem 0; font-size: 1.2rem; cursor: pointer;
-            transition: all 0.2s; color: #0369a1; font-weight: bold;
-            display: flex; align-items: center; gap: 0.5rem;
-        }
-        .quiz-option:active { transform: scale(0.98); background: #e0f2fe; }
-        .quiz-option.correct { background: #dcfce7; border-color: #4ade80; color: #15803d; }
-        .quiz-option.wrong { background: #fee2e2; border-color: #f87171; color: #b91c1c; }
-        .quiz-option .opt-emoji { font-size: 1.5rem; }
-        .highlight {
-            background: linear-gradient(120deg, #fef08a 40%, #fde047 100%);
-            padding: 0 4px; border-radius: 4px; font-weight: bold; color: #92400e;
-        }
-        .highlight-blue {
-            background: linear-gradient(120deg, #bae6fd 40%, #7dd3fc 100%);
-            color: #0369a1;
-        }
-        .highlight-green {
-            background: linear-gradient(120deg, #bbf7d0 40%, #86efac 100%);
-            color: #15803d;
-        }
-        #wrong-hint {
-            display: none; background: #fef2f2; border: 3px solid #fca5a5;
-            border-radius: 1rem; padding: 1rem; margin-top: 1rem;
-            text-align: center; color: #b91c1c; font-weight: bold; font-size: 1.1rem;
-            animation: shake 0.5s ease-in-out;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        .cert-container {
-            background: #fffbeb; border: 12px double #b45309; padding: 2rem;
-            position: relative; overflow: hidden; transition: all 0.5s;
-        }
-        .cert-seal {
-            position: absolute; bottom: 20px; right: 20px; width: 100px; height: 100px;
-            background: #ef4444; border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; color: white; font-weight: bold;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.3); border: 4px solid #fbbf24;
-            transform: rotate(-15deg); font-size: 1.2rem; line-height: 1.2;
-        }
-        .theme-gold { background: linear-gradient(to bottom right, #fffbeb, #fef3c7); border-color: #d97706; }
-        .theme-gold .cert-title { color: #b45309; text-shadow: 1px 1px 0px #fcd34d; }
-        .theme-gold .cert-seal { background: #d97706; border-color: #fcd34d; }
-        .theme-gold .cert-highlight { color: #d97706; }
-        .theme-silver { background: linear-gradient(to bottom right, #f0f9ff, #e0f2fe); border-color: #0369a1; }
-        .theme-silver .cert-title { color: #0369a1; }
-        .theme-silver .cert-seal { background: #0ea5e9; border-color: #bae6fd; }
-        .theme-silver .cert-highlight { color: #0284c7; }
-        .theme-bronze { background: linear-gradient(to bottom right, #f0fdf4, #dcfce7); border-color: #15803d; }
-        .theme-bronze .cert-title { color: #15803d; }
-        .theme-bronze .cert-seal { background: #22c55e; border-color: #86efac; }
-        .theme-bronze .cert-highlight { color: #16a34a; }
-        .confetti {
-            position: absolute; width: 10px; height: 10px;
-            animation: confettiFall 2s linear infinite;
-        }
-        @keyframes confettiFall {
-            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(400px) rotate(360deg); opacity: 0; }
-        }
-        .bg-hot { background: linear-gradient(to bottom, #fefce8, #bae6fd) !important; }
-        .bg-cold { background: linear-gradient(to bottom, #7dd3fc, #bae6fd) !important; }
-        .bg-super-cold { background: linear-gradient(to bottom, #1e3a8a, #3b82f6) !important; }
-        .bg-ground { background: linear-gradient(to bottom, #fde047, #fef9c3) !important; }
-        .pulse-btn { animation: pulse 1s infinite; border-color: #f59e0b !important; border-width: 6px !important; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .wipe-hint { animation: handMove 2s infinite; }
-        @keyframes handMove { 0% { transform: translateX(0); } 50% { transform: translateX(20px); } 100% { transform: translateX(0); } }
-        /* 是非題 */
-        .tf-container { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
-        .tf-btn {
-            font-size: 3rem; padding: 1.5rem 3rem; border-radius: 2rem;
-            border: 4px solid #bae6fd; background: #f0f9ff; cursor: pointer;
-            transition: all 0.2s; user-select: none;
-        }
-        .tf-btn:hover { transform: scale(1.1); background: #e0f2fe; }
-        .tf-btn:active { transform: scale(0.95); }
-        /* 排列題 */
-        .sort-container { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin: 1.5rem 0; }
-        .sort-item {
-            background: linear-gradient(135deg, #fff7ed, #ffedd5);
-            border: 3px solid #fb923c; border-radius: 1rem;
-            padding: 0.75rem 1.25rem; font-size: 1.2rem; font-weight: bold;
-            color: #c2410c; cursor: grab; transition: all 0.2s;
-            min-width: 80px; text-align: center; user-select: none;
-        }
-        .sort-item:active { cursor: grabbing; }
-        .sort-item.dragging { opacity: 0.5; transform: scale(1.1); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .sort-item.in-order { background: #dcfce7; border-color: #4ade80; color: #15803d; }
-        /* 小問題彈窗 */
-        .mini-quiz-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 250;
-            justify-content: center; align-items: center; backdrop-filter: blur(3px);
-        }
-        .mini-quiz-card {
-            background: white; border-radius: 2rem; padding: 2rem;
-            border: 6px solid #a78bfa; max-width: 400px; text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            animation: popIn 0.4s ease-out;
-        }
-        /* 語音按鈕 */
-        .speech-btn {
-            background: #f0f9ff; border: 2px solid #7dd3fc; border-radius: 50%;
-            width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer;
-            transition: all 0.2s; display: inline-flex; align-items: center;
-            justify-content: center;
-        }
-        .speech-btn:hover { background: #e0f2fe; transform: scale(1.1); }
-        .speech-btn:active { transform: scale(0.95); }
-        /* 雷達圖文字版 */
-        .radar-text {
-            display: flex; flex-direction: column; gap: 0.5rem;
-            background: #f8fafc; border-radius: 1rem; padding: 1rem;
-            margin: 1rem 0;
-        }
-        .radar-row { display: flex; align-items: center; gap: 0.5rem; font-weight: bold; }
-        .radar-bar {
-            height: 20px; background: linear-gradient(90deg, #4ade80, #86efac);
-            border-radius: 4px; transition: width 0.5s ease;
-        }
-        /* 下載按鈕 */
-        .download-btn {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white; padding: 1rem 2rem; border-radius: 1rem;
-            font-weight: bold; font-size: 1.2rem; cursor: pointer;
-            border: none; transition: all 0.2s;
-        }
-        .download-btn:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(37,99,235,0.4); }
+        body { font-family: 'ZCOOL+KuaiLe', cursive, system-ui, sans-serif; background-color: #f0f9ff; overflow-x: hidden; touch-action: manipulation; user-select: none; }
+        #landing-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .login-card { background: white; padding: 3rem; border-radius: 2rem; box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3); text-align: center; border: 8px solid #7dd3fc; width: 90%; max-width: 450px; animation: bounceIn 1s; }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
+        .canvas-area { height: 380px; position: relative; background: linear-gradient(to bottom, #87CEEB, #E0F2FE); border-radius: 2rem; overflow: hidden; border: 8px solid #bae6fd; transition: all 1s ease; }
+        .magic-btn { transition: transform 0.1s, filter 0.2s; box-shadow: 0 6px 0 #94a3b8; }
+        .magic-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #94a3b8; }
+        .btn-sun { background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%); border-color: #ca8a04; }
+        .btn-cloud { background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%); border-color: #64748b; }
+        .btn-rain { background: linear-gradient(135deg, #e0f2fe 0%, #7dd3fc 100%); border-color: #0284c7; }
+        .btn-snow { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-color: #94a3b8; }
+        .btn-dew { background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%); border-color: #d97706; }
+        .btn-quiz { background: linear-gradient(135deg, #f3e8ff 0%, #c4b5fd 100%); border-color: #7c3aed; }
+        #sun-obj, #cloud-obj, #puddle-obj, #ground-obj { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); font-size: 4rem; transition: all 1s; }
+        #cloud-obj { bottom: 80px; }
+        .sun-active { animation: sunPulse 2s ease-in-out infinite; color: #facc15; }
+        @keyframes sunPulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.2); } }
+        .cloud-active { animation: cloudFloat 3s ease-in-out infinite; }
+        @keyframes cloudFloat { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-10px); } }
+        .sound-word { position: absolute; font-size: 2rem; font-weight: bold; animation: floatUp 2s ease-out forwards; pointer-events: none; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+        .rain-drop { position: absolute; width: 4px; height: 20px; background: linear-gradient(to bottom, transparent, #60a5fa); border-radius: 50%; animation: rainFall 1s linear forwards; }
+        @keyframes rainFall { 0% { top: -20px; opacity: 1; } 100% { top: 400px; opacity: 0.3; } }
+        .snow-flake { position: absolute; animation: snowFall 3s linear forwards; font-size: 1.5rem; }
+        @keyframes snowFall { 0% { top: -40px; opacity: 1; } 100% { top: 400px; opacity: 0.2; } }
+        .vapor-dot { position: absolute; width: 8px; height: 8px; background: rgba(255,255,255,0.8); border-radius: 50%; }
+        .vapor-floating { animation: vaporRise 4s ease-out forwards; }
+        @keyframes vaporRise { 0% { opacity: 0.8; } 100% { opacity: 0; transform: translateY(-200px); } }
+        .quiz-card { background: white; border-radius: 2rem; padding: 2rem; border: 8px solid #7dd3fc; box-shadow: 0 20px 60px rgba(59,130,246,0.3); max-width: 450px; margin: 0 auto; }
+        .quiz-option { transition: all 0.2s; }
+        .quiz-option:hover { transform: scale(1.03); }
+        .correct { background: #bbf7d0 !important; border-color: #22c55e !important; }
+        .wrong { background: #fecaca !important; border-color: #ef4444 !important; }
+        .pulse-btn { animation: pulseGlow 1.5s ease-in-out infinite; }
+        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.5); } 50% { box-shadow: 0 0 0 10px rgba(147, 51, 234, 0); } }
+        .cert-container { background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%); border: 8px solid #f59e0b; border-radius: 2rem; padding: 2rem; text-align: center; }
+        .cert-seal { width: 80px; height: 80px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.8rem; margin: 1rem auto; }
+        .highlight-yellow { background: linear-gradient(120deg, #fef08a 40%, #fef08a 100%); padding: 0 4px; border-radius: 4px; }
+        .highlight-blue { background: linear-gradient(120deg, #bae6fd 40%, #bae6fd 100%); padding: 0 4px; border-radius: 4px; }
+        .highlight-sky { background: linear-gradient(120deg, #e0f2fe 40%, #e0f2fe 100%); padding: 0 4px; border-radius: 4px; }
+        .highlight-orange { background: linear-gradient(120deg, #fed7aa 40%, #fed7aa 100%); padding: 0 4px; border-radius: 4px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 8888; }
+        @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
     </style>
 </head>
-<body class="p-4">
+<body>
 
-    <!-- 1. 登入首頁 -->
+    <!-- 登入頁面 -->
     <div id="landing-page">
         <div class="login-card">
-            <div class="text-7xl mb-4">🌦️</div>
-            <h1 class="text-4xl font-bold text-sky-600 mb-2">氣象小魔術師</h1>
-            <p class="text-xl text-gray-500 mb-8">準備好變魔術了嗎？</p>
-            <div class="mb-6">
-                <label class="block text-left text-lg font-bold text-gray-700 mb-2 ml-2">我是...</label>
-                <input type="text" id="student-name" placeholder="請輸入你的名字"
-                    class="w-full text-2xl p-4 border-4 border-sky-300 rounded-xl focus:outline-none focus:border-sky-500 text-center placeholder-gray-300">
+            <h1 class="text-5xl font-bold text-sky-600 mb-4">🌦️ 氣象小魔術師</h1>
+            <p class="text-xl text-gray-600 mb-6">水循環 ・ 蒸發 ・ 凝結 ・ 降水</p>
+            <div class="mb-5">
+                <input type="text" id="student-name" placeholder="請輸入你的名字" class="w-full text-2xl p-4 border-4 border-sky-300 rounded-xl text-center placeholder-gray-300">
             </div>
-            <button id="btn-start" class="w-full bg-sky-500 text-white text-3xl font-bold py-4 rounded-xl shadow-lg border-b-8 border-sky-700 active:border-b-0 active:translate-y-2 transition-all">
-                開始冒險！🚀
-            </button>
+            <button id="btn-start" class="w-full bg-sky-500 text-white text-3xl font-bold py-4 rounded-xl shadow-lg border-b-8 border-sky-700 active:border-b-0 active:translate-y-2 transition-all">開始冒險！🚀</button>
         </div>
     </div>
 
-    <!-- 2. 遊戲主畫面 -->
+    <!-- 遊戲主畫面 -->
     <div id="game-container" class="hidden max-w-md mx-auto bg-white rounded-3xl shadow-xl p-5 border-4 border-sky-200 min-h-screen flex flex-col">
-        <div class="flex justify-between items-center mb-2 px-2">
-            <h1 class="text-3xl text-sky-600 font-bold tracking-wider">氣象小魔術師</h1>
-            <div class="flex items-center gap-2">
-                <div id="speech-toggle" class="text-2xl cursor-pointer" onclick="toggleSpeech()">🔇</div>
-                <div class="bg-sky-100 text-sky-700 px-3 py-1 rounded-full font-bold text-sm">
-                    學員: <span id="display-name"></span>
-                </div>
-            </div>
+        <div class="text-center mb-3">
+            <span class="text-lg text-gray-500">歡迎，<span id="display-name" class="font-bold text-sky-600"></span>！</span>
+            <button id="speech-toggle" class="float-right text-2xl">🔇</button>
         </div>
-        
-        <div id="display" class="canvas-area mb-4 flex flex-col items-center justify-center transition-colors duration-700" onclick="handleCanvasClick()">
-            <div id="sun-obj" class="sun">☀️</div>
-            <div id="status-text" class="absolute top-4 bg-white/90 px-4 py-2 rounded-full text-sky-800 font-bold z-20 text-lg shadow-md border-2 border-sky-100 text-center leading-tight">
-                地上有一灘水<br>怎麼讓它跑到天上去？
-            </div>
-            <div id="vapor-container"></div>
-            <div id="cloud-obj" class="cloud" style="top: 15%;">
-                <svg viewBox="0 0 24 24" fill="white" class="drop-shadow-xl"><path d="M17.5,19c-3.037,0-5.5-2.463-5.5-5.5c0-0.106,0.006-0.21,0.014-0.313C10.603,13.805,9.336,14,8,14c-3.314,0-6-2.686-6-6s2.686-6,6-6c1.071,0,2.074,0.282,2.938,0.777C12.001,1.724,13.407,1,15,1c2.761,0,5,2.239,5,5c0,0.147-0.01,0.291-0.022,0.434C21.846,6.963,23,8.846,23,11C23,14.314,20.314,17,17.5,17L17.5,19z"/></svg>
-            </div>
-            <div id="puddle-obj" class="puddle"></div>
-            <div id="ground-obj" class="hidden absolute bottom-5 flex flex-col items-center scale-110 transition-all duration-500">
-                <div class="relative w-32 h-44 bg-orange-100/50 rounded-lg border-4 border-orange-300 shadow-inner overflow-hidden" id="bottle-body">
-                    <div class="absolute bottom-0 w-full h-3/4 bg-orange-200 transition-all duration-1000" id="juice-level"></div>
-                    <div id="ice-cubes" class="hidden">
-                        <div class="absolute w-6 h-6 bg-white/60 border border-white rounded top-20 left-4 rotate-12"></div>
-                        <div class="absolute w-6 h-6 bg-white/60 border border-white rounded top-24 right-6 -rotate-12"></div>
-                    </div>
-                    <div id="dew-drops" class="hidden absolute inset-0 z-10 cursor-pointer">
-                        <div class="absolute top-12 left-2 w-3 h-4 bg-blue-400 rounded-full opacity-70 shadow-sm border border-white/50"></div>
-                        <div class="absolute top-20 right-2 w-4 h-5 bg-blue-400 rounded-full opacity-70 shadow-sm border border-white/50"></div>
-                    </div>
-                    <div id="hand-hint" class="hidden absolute top-1/2 left-1/2 text-4xl opacity-80 wipe-hint">👆</div>
-                </div>
-                <div id="bottle-label" class="mt-4 font-bold text-orange-800 text-lg bg-white/60 px-3 py-1 rounded-full">常溫的瓶子</div>
-            </div>
+        <h2 class="text-2xl font-bold text-center text-sky-700 mb-3">🌦️ 水循環實驗室</h2>
+        <div id="status-text" class="text-center text-xl text-gray-600 mb-3 min-h-[60px]">選擇下面既魔法按鈕，變出天氣！</div>
+
+        <!-- Canvas Area -->
+        <div class="canvas-area flex items-end justify-center" id="display">
+            <div id="ground-obj">🌱</div>
+            <div id="puddle-obj">💧</div>
+            <div id="sun-obj" class="hidden">☀️</div>
+            <div id="cloud-obj" class="hidden">☁️</div>
+            <div id="vapor-container" style="position:absolute;bottom:80px;width:100%;height:200px;pointer-events:none;"></div>
         </div>
 
-        <div class="flex flex-col gap-3">
-            <button id="btn-sun" onclick="makeSun()" class="magic-btn bg-yellow-100 border-b-4 border-yellow-400 p-3 rounded-2xl flex items-center justify-center gap-4 h-18 pulse-btn">
-                <span class="text-4xl">☀️</span>
-                <div class="text-left">
-                    <div class="font-bold text-yellow-800 text-xl">1. 太陽出來</div>
-                    <div class="text-yellow-600 text-sm">水曬乾變成氣</div>
-                </div>
-            </button>
-            <button id="btn-cloud" onclick="makeCloud()" class="magic-btn disabled-btn bg-sky-100 border-b-4 border-sky-400 p-3 rounded-2xl flex items-center justify-center gap-4 h-18">
-                <span class="text-4xl">❄️</span>
-                <div class="text-left">
-                    <div class="font-bold text-sky-800 text-xl">2. 空氣變冷</div>
-                    <div class="text-sky-600 text-sm">氣體變成雲</div>
-                </div>
-            </button>
-            <div class="grid grid-cols-2 gap-3">
-                <button id="btn-rain" onclick="makeRain()" class="magic-btn disabled-btn bg-blue-100 border-b-4 border-blue-400 p-2 rounded-2xl flex flex-col items-center justify-center h-24">
-                    <span class="text-3xl mb-1">🌧️</span>
-                    <span class="font-bold text-blue-800">有點冷</span>
-                    <span class="text-xs text-blue-600">(變雨滴)</span>
-                </button>
-                <button id="btn-snow" onclick="makeSnow()" class="magic-btn disabled-btn bg-indigo-100 border-b-4 border-indigo-300 p-2 rounded-2xl flex flex-col items-center justify-center h-24">
-                    <span class="text-3xl mb-1">🥶</span>
-                    <span class="font-bold text-indigo-800">超級冷</span>
-                    <span class="text-xs text-indigo-600">(變雪花)</span>
-                </button>
-            </div>
-            <button id="btn-dew" onclick="makeDew()" class="magic-btn bg-orange-100 border-b-4 border-orange-400 p-3 rounded-2xl flex items-center justify-center gap-4 h-18 mt-2">
-                <span class="text-4xl">🍹</span>
-                <div class="text-left">
-                    <div class="font-bold text-orange-800 text-xl">特別實驗：露水</div>
-                    <div class="text-orange-600 text-sm">冰瓶子流汗了？</div>
-                </div>
-            </button>
+        <!-- 實驗按鈕區 -->
+        <div class="grid grid-cols-3 gap-3 mt-4">
+            <button id="btn-sun" class="magic-btn btn-sun text-2xl p-3 rounded-xl border-4 font-bold">☀️ 太陽</button>
+            <button id="btn-cloud" class="magic-btn btn-cloud text-2xl p-3 rounded-xl border-4 font-bold">☁️ 雲</button>
+            <button id="btn-rain" class="magic-btn btn-rain text-2xl p-3 rounded-xl border-4 font-bold">🌧️ 雨</button>
+            <button id="btn-snow" class="magic-btn btn-snow text-2xl p-3 rounded-xl border-4 font-bold">❄️ 雪</button>
+            <button id="btn-dew" class="magic-btn btn-dew text-2xl p-3 rounded-xl border-4 font-bold">🍹 露水</button>
+            <button id="btn-quiz" class="magic-btn btn-quiz text-xl p-3 rounded-xl border-4 font-bold bg-purple-100 text-purple-400 border-purple-200 pointer-events-none">📝 評估</button>
         </div>
 
-        <button id="btn-quiz" onclick="showLevelModal()" class="w-full mt-6 bg-purple-100 text-purple-400 font-bold py-3 rounded-xl border-b-4 border-purple-200 text-xl pointer-events-none transition-all">
-            📝 請先完成所有實驗...
-        </button>
-        <button onclick="resetGame()" class="w-full mt-4 bg-slate-100 text-slate-500 font-bold py-3 rounded-xl border-2 border-slate-200">登出 / 重來</button>
-    </div>
-
-    <!-- 觀察回饋 Toast -->
-    <div id="toast" class="toast-popup">
-        <div class="text-3xl mb-2" id="toast-icon">✨</div>
-        <div class="text-xl font-bold text-gray-700" id="toast-text"></div>
-    </div>
-
-    <!-- 難度選擇模組 -->
-    <div id="level-modal" class="modal-overlay">
-        <div class="quiz-card">
-            <div class="text-6xl mb-4">🎯</div>
-            <h2 class="text-2xl font-bold text-sky-600 mb-2">選擇你的難度</h2>
-            <p class="text-gray-500 mb-6 font-bold">答題前先選難度喔！</p>
-            <div class="flex flex-col gap-4">
-                <button onclick="startQuiz('easy')" class="bg-green-100 border-4 border-green-300 rounded-2xl p-4 text-left hover:bg-green-200 transition-all">
-                    <div class="flex items-center gap-3">
-                        <span class="text-4xl">🌱</span>
-                        <div>
-                            <div class="font-bold text-green-800 text-xl">簡單</div>
-                            <div class="text-green-600 text-sm">3選1，好簡單！</div>
-                        </div>
-                    </div>
-                </button>
-                <button onclick="startQuiz('medium')" class="bg-yellow-100 border-4 border-yellow-300 rounded-2xl p-4 text-left hover:bg-yellow-200 transition-all">
-                    <div class="flex items-center gap-3">
-                        <span class="text-4xl">🌻</span>
-                        <div>
-                            <div class="font-bold text-yellow-800 text-xl">中等</div>
-                            <div class="text-yellow-600 text-sm">4選1，要諗一諗</div>
-                        </div>
-                    </div>
-                </button>
-                <button onclick="startQuiz('hard')" class="bg-red-100 border-4 border-red-300 rounded-2xl p-4 text-left hover:bg-red-200 transition-all">
-                    <div class="flex items-center gap-3">
-                        <span class="text-4xl">🔥</span>
-                        <div>
-                            <div class="font-bold text-red-800 text-xl">困難</div>
-                            <div class="text-red-600 text-sm">4選1，全部都係難嘢！</div>
-                        </div>
-                    </div>
-                </button>
+        <!-- 評估區 -->
+        <div id="quiz-section" class="hidden mt-5">
+            <div class="quiz-card">
+                <div id="quiz-level-badge" class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold mb-4"></div>
+                <div id="quiz-progress" class="h-2 bg-sky-200 rounded-full mb-4 overflow-hidden"><div id="quiz-bar" class="h-full bg-sky-500 transition-all" style="width:0%"></div></div>
+                <div id="quiz-question" class="text-xl font-bold text-gray-700 mb-4 text-center"></div>
+                <div id="quiz-options" class="flex flex-col gap-2"></div>
             </div>
-            <button onclick="closeLevelModal()" class="mt-6 text-gray-400 font-bold hover:text-gray-600">取消</button>
+        </div>
+
+        <!-- 證書卡片 -->
+        <div id="cert-card" class="hidden mt-5">
+            <div class="cert-container">
+                <div class="text-6xl mb-2">🎓</div>
+                <h3 class="text-2xl font-bold text-amber-700 mb-2">🌦️ 氣象小魔術師 🌦️</h3>
+                <p id="cert-name" class="text-xl font-bold text-gray-700 mb-2"></p>
+                <p class="text-lg text-gray-600 mb-4">恭喜完成所有實驗！</p>
+                <div class="text-left bg-white/50 rounded-xl p-4 mb-4">
+                    <p class="text-center text-xl font-bold text-sky-700 mb-2">📊 學習成果</p>
+                    <div class="text-base space-y-1">
+                        <div>☀️ 蒸發概念：<span id="cert-evaporate" class="font-bold">0</span>%</div>
+                        <div>☁️ 凝結概念：<span id="cert-condense" class="font-bold">0</span>%</div>
+                        <div>🌧️ 降水概念：<span id="cert-precipitate" class="font-bold">0</span>%</div>
+                        <div>💧 露水概念：<span id="cert-dew" class="font-bold">0</span>%</div>
+                    </div>
+                    <div class="mt-3 text-center text-2xl font-bold text-amber-600">總分：<span id="cert-score">0</span>/50</div>
+                </div>
+                <div class="cert-seal">通過<br>認證</div>
+                <p class="text-sm text-gray-500 mt-4">日期：<span id="cert-date"></span></p>
+                <button onclick="location.reload()" class="mt-4 bg-sky-500 text-white px-6 py-3 rounded-xl font-bold">好棒！再玩一次 ✨</button>
+            </div>
         </div>
     </div>
 
-    <!-- 測驗模組 -->
-    <div id="quiz-modal" class="modal-overlay">
-        <div class="quiz-card">
-            <div class="flex justify-between items-center mb-2">
-                <div id="quiz-icon" class="text-5xl">🤔</div>
-                <button class="speech-btn" onclick="speakQuestion()" title="🔊 讀題">🔊</button>
-            </div>
-            <h2 class="text-2xl font-bold text-sky-600 mb-2">科學檢視筆記</h2>
-            <div id="quiz-level-badge" class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold mb-4"></div>
-            <div class="w-full h-2 bg-gray-200 rounded-full mb-6">
-                <div id="quiz-progress" class="h-2 bg-sky-500 rounded-full transition-all" style="width: 0%"></div>
-            </div>
-            <p id="quiz-question" class="text-xl font-bold text-gray-800 mb-4 leading-normal"></p>
-            <div id="quiz-options"></div>
-            <div id="wrong-hint"></div>
-        </div>
-    </div>
-
-    <!-- 小問題彈窗（形成性評估） -->
-    <div id="mini-quiz-overlay" class="mini-quiz-overlay">
-        <div class="mini-quiz-card">
-            <div id="mini-quiz-icon" class="text-5xl mb-3">❓</div>
-            <p id="mini-quiz-question" class="text-xl font-bold text-gray-800 mb-6"></p>
-            <div id="mini-quiz-options" class="flex flex-col gap-2"></div>
-        </div>
-    </div>
-
-    <!-- 分級榮譽證書模組 -->
-    <div id="cert-modal" class="modal-overlay">
-        <div id="cert-card" class="quiz-card cert-container transform scale-100">
-            <div class="text-center">
-                <div id="cert-icon" class="text-6xl mb-2">🎓</div>
-                <h1 id="cert-main-title" class="cert-title text-3xl font-bold mb-1 tracking-widest border-b-4 border-transparent inline-block pb-2">
-                    榮譽證書
-                </h1>
-                <p class="text-gray-500 font-bold mt-4">茲證明學員</p>
-                <h2 id="cert-name" class="text-4xl font-bold text-gray-800 my-4 underline decoration-wavy decoration-gray-300"></h2>
-                <p id="cert-desc" class="text-gray-700 text-lg font-bold leading-relaxed mb-4"></p>
-                
-                <!-- 概念掌握雷達圖（文字版） -->
-                <div id="concept-radar" class="radar-text"></div>
-                
-                <!-- 個人化推薦 -->
-                <div id="personal-recommend" class="bg-purple-50 rounded-xl p-4 mb-4 text-left text-lg"></div>
-                
-                <!-- 下載成績報告 -->
-                <button onclick="downloadReport()" class="download-btn mb-4">📥 下載成績報告</button>
-                
-                <div class="flex justify-between items-end mt-4 border-t-2 border-gray-200 pt-4">
-                    <div class="text-sm text-gray-500 font-bold">日期：<span id="cert-date"></span></div>
-                    <div id="cert-seal" class="cert-seal">通過<br>認證</div>
-                </div>
-                <button onclick="resetGame()" class="mt-6 bg-sky-500 text-white px-8 py-3 rounded-full font-bold text-xl shadow-lg border-b-4 border-sky-700 active:translate-y-1 active:border-b-0">
-                    好棒！再玩一次
-                </button>
-            </div>
-        </div>
+    <!-- Toast 提示 -->
+    <div id="toast" style="display:none;position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:white;border-radius:1rem;padding:1rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,0.15);border:4px solid #7dd3fc;z-index:9999;">
+        <span id="toast-icon" class="text-2xl mr-2"></span><span id="toast-text" class="text-xl"></span>
     </div>
 
     <script src="app.js"></script>
 </body>
 </html>
-
