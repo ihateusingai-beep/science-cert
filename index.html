@@ -467,9 +467,19 @@
 
     function setAnswerType(type) {
         answerType = type;
-        document.getElementById('at-text').classList.toggle('active', type === 'text');
-        document.getElementById('at-pic').classList.toggle('active', type === 'pic');
-        document.getElementById('at-voice').classList.toggle('active', type === 'voice');
+        var atText = document.getElementById('at-text');
+        var atPic = document.getElementById('at-pic');
+        var atVoice = document.getElementById('at-voice');
+        if (!atText || !atPic || !atVoice) return; // safety guard
+        atText.classList.toggle('active', type === 'text');
+        atPic.classList.toggle('active', type === 'pic');
+        atVoice.classList.toggle('active', type === 'voice');
+
+        // Remove any lingering voice-hint-btn from previous render
+        var oldHint = document.querySelector('.voice-hint-btn');
+        if (oldHint) oldHint.remove();
+
+        // Re-render current question with new answer type
         if (currentQ < quizQuestions.length) renderQuestion(currentQ);
     }
 
@@ -521,6 +531,10 @@
 
         var quizOptsEl = document.getElementById('quiz-options');
         quizOptsEl.innerHTML = '';
+
+        // Clean up stale voice-hint-btn before every render
+        var staleHint = document.querySelector('.voice-hint-btn');
+        if (staleHint) staleHint.remove();
 
         if (answerType === 'pic') {
             renderPictoQuestion(q, quizOptsEl);
