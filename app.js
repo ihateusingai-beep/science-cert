@@ -18,10 +18,6 @@ function enterGame() {
     }, 500);
 }
 
-document.getElementById('student-name').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') enterGame();
-});
-
 // ============ 實驗按鈕 ============
 function makeSun() {
     if (progress.sun) return;
@@ -101,9 +97,6 @@ function showSound(text) {
 }
 
 // ============ 小評估（5條題） ============
-var quizScore = 0;
-var currentQ = 0;
-
 function startQuiz() {
     document.getElementById('quiz-section').classList.remove('hidden');
     document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' });
@@ -171,7 +164,9 @@ function createConfetti() {
 }
 
 // ============ INIT ============
-document.addEventListener('DOMContentLoaded', function() {
+function bindButtons() {
+    var btn = document.getElementById('btn-start');
+    if (!btn) return false;
     landingPage = document.getElementById('landing-page');
     gameContainer = document.getElementById('game-container');
     statusText = document.getElementById('status-text');
@@ -190,11 +185,21 @@ document.addEventListener('DOMContentLoaded', function() {
     quizQEl = document.getElementById('quiz-question');
     quizOptsEl = document.getElementById('quiz-options');
     quizProgEl = document.getElementById('quiz-progress');
-    document.getElementById('btn-start').addEventListener('click', enterGame);
+    btn.addEventListener('click', enterGame);
+    document.getElementById('student-name').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') enterGame();
+    });
     document.getElementById('btn-sun').addEventListener('click', makeSun);
     document.getElementById('btn-cloud').addEventListener('click', makeCloud);
     document.getElementById('btn-rain').addEventListener('click', makeRain);
     document.getElementById('btn-snow').addEventListener('click', makeSnow);
     document.getElementById('btn-dew').addEventListener('click', makeDew);
     document.getElementById('btn-quiz').addEventListener('click', startQuiz);
-});
+    return true;
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindButtons);
+} else {
+    bindButtons();
+}
